@@ -3,6 +3,7 @@
 #define LED_PIN    3
 #define NUMPIXELS 25
 #define BTN_PIN    4
+#define FLOOR 3
 
 Adafruit_NeoPixel pixels(NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -11,21 +12,21 @@ unsigned long speed = 50;
 unsigned long long timeStamp = 0;
 bool start = false;
 bool isFlying = true;
-bool flag = false;
+bool buttonReleased = false;
 
 void initGame(){
   speed = 50;
   start = false;
   isFlying = true;
-  flag = false;
+  buttonReleased = false;
 }
 
 void renderGame(int position){
-  for(int i = 0; i < 3; i++){
+  for(int i = 0; i < FLOOR; i++){
     pixels.setPixelColor(i, pixels.Color(0, 127, 0));
   }
   
-  if(position < 3){
+  if(position < FLOOR){
     pixels.setPixelColor(position, pixels.Color(127, 127, 0));
   }else{
     pixels.setPixelColor(position, pixels.Color(127, 0, 0));
@@ -83,11 +84,15 @@ void loop() {
     isFlying = false;
   }
 
-  if(ball < 3 && !digitalRead(BTN_PIN) && flag){
+  if(ball < FLOOR && !digitalRead(BTN_PIN) && buttonReleased){
     isFlying = true;
     speed -= 1;
-    flag = false;
+    buttonReleased = false;
   }
+  else if(digitalRead(BTN_PIN) && ball < FLOOR){
+    buttonReleased = true;
+  }
+
   
 
   if(millis() - timeStamp > speed){
@@ -96,7 +101,6 @@ void loop() {
     }else{
       ball--;
     }
-    flag = true;
     timeStamp = millis();
   }
 
